@@ -60,7 +60,8 @@ namespace iPhone_Photo_Sort
 
     private void button_sort_Click(object sender, RoutedEventArgs e)
     {
-
+      
+      //test code inserted...
     }
   }
 }
