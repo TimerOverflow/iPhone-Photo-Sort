@@ -5,12 +5,26 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:iPhone_Photo_Sort"
         mc:Ignorable="d"
-        Title="iPhone Photo Sort" Height="169" Width="480">
+        Title="iPhone Photo Sort" Height="353" Width="656">
   <Grid Background="#FF3C3939">
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="68*"/>
-      <ColumnDefinition Width="413*"/>
+      <ColumnDefinition Width="0*"/>
+      <ColumnDefinition/>
     </Grid.ColumnDefinitions>
-    <Button x:Name="button" Grid.Column="1" Content="Button" HorizontalAlignment="Left" Margin="152,77,0,0" VerticalAlignment="Top" Click="button_Click"/>
+    <Button x:Name="Button_path" Content="..." HorizontalAlignment="Left" Margin="36,124,0,0" VerticalAlignment="Top" Click="button_Click" Width="35" FontSize="18" Height="25" Grid.Column="1"/>
+    <RichTextBox x:Name="richTextBox_MessageOutput" Margin="36,200,36,17" Grid.Column="1">
+      <FlowDocument/>
+    </RichTextBox>
+    <TextBox x:Name="TextBox_Path" Grid.Column="1" HorizontalAlignment="Left" TextWrapping="Wrap" Text="select folder" VerticalAlignment="Top" Width="538" RenderTransformOrigin="0.5,0.5" Height="25" Margin="82,124,0,0">
+      <TextBox.RenderTransform>
+        <TransformGroup>
+          <ScaleTransform/>
+          <SkewTransform AngleX="0"/>
+          <RotateTransform/>
+          <TranslateTransform X="0"/>
+        </TransformGroup>
+      </TextBox.RenderTransform>
+    </TextBox>
+    <Button x:Name="button_sort" Content="SORT" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="36,169,0,0" VerticalAlignment="Top" Click="button_sort_Click"/>
   </Grid>
 </Window>
