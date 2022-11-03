@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,14 +27,41 @@ namespace iPhone_Photo_Sort
       InitializeComponent();
     }
 
+    public void AddLine(string text)
+    {
+      richTextBox_MessageOutput.AppendText(text);
+      richTextBox_MessageOutput.AppendText("\u2028"); // Linebreak, not paragraph break
+      richTextBox_MessageOutput.ScrollToEnd();
+    } 
+
     private void button_Click(object sender, RoutedEventArgs e)
     {
-      CommonOpenFileDialog dialog = new CommonOpenFileDialog();
-      dialog.IsFolderPicker = true;
-      if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+      CommonOpenFileDialog openFileDialog = new CommonOpenFileDialog();
+
+      openFileDialog.IsFolderPicker = true;
+
+      if (openFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
       {
-        //label.Text = dialog.FileName; // 테스트용, 폴더 선택이 완료되면 선택된 폴더를 label에 출력
+        TextBox_Path.Text = openFileDialog.FileName;
+
+        var di = new DirectoryInfo(TextBox_Path.Text);
+        var files = di.EnumerateFiles();
+        var cnt = 0;
+
+        foreach(var file in files)
+        {
+          AddLine(file.Name);
+          cnt++;
+        }
+
+        AddLine("total files : " + cnt.ToString());
       }
+    }
+
+    private void button_sort_Click(object sender, RoutedEventArgs e)
+    {
+      
+      //test code inserted...
     }
   }
 }
