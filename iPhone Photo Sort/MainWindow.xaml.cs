@@ -22,6 +22,11 @@ namespace iPhone_Photo_Sort
   /// </summary>
   public partial class MainWindow : Window
   {
+    static string Directory = "";
+    static int MaxFiles = 2000;
+    static string[] FileName = new string[MaxFiles];
+    static int FindFiles = 0;
+
     public MainWindow()
     {
       InitializeComponent();
@@ -34,7 +39,7 @@ namespace iPhone_Photo_Sort
       richTextBox_MessageOutput.ScrollToEnd();
     } 
 
-    private void button_Click(object sender, RoutedEventArgs e)
+    public void button_Click(object sender, RoutedEventArgs e)
     {
       CommonOpenFileDialog openFileDialog = new CommonOpenFileDialog();
 
@@ -43,25 +48,73 @@ namespace iPhone_Photo_Sort
       if (openFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
       {
         TextBox_Path.Text = openFileDialog.FileName;
+        Directory = openFileDialog.FileName;
 
         var di = new DirectoryInfo(TextBox_Path.Text);
         var files = di.EnumerateFiles();
-        var cnt = 0;
 
-        foreach(var file in files)
+        FindFiles = 0;
+        foreach (var file in files)
         {
           AddLine(file.Name);
-          cnt++;
+          FileName[FindFiles++] = file.Name;
         }
 
-        AddLine("total files : " + cnt.ToString());
+        AddLine("total files : " + FindFiles.ToString());
       }
     }
 
-    private void button_sort_Click(object sender, RoutedEventArgs e)
+    public void button_sort_Click(object sender, RoutedEventArgs e)
     {
-      
-      //test code inserted...
+      DirectoryInfo iPhone = new DirectoryInfo(Directory + "\\iPhone");
+      DirectoryInfo iPhoneOrg = new DirectoryInfo(Directory + "\\iPhone\\Org");
+      DirectoryInfo iPhoneFiltered = new DirectoryInfo(Directory + "\\iPhone\\Filtered");
+      DirectoryInfo Others = new DirectoryInfo(Directory + "\\Others");
+
+      if(iPhone.Exists == false)
+      {
+        iPhone.Create();
+        AddLine(iPhone.FullName + " created!");
+      }
+
+      if(iPhoneOrg.Exists == false)
+      {
+        iPhoneOrg.Create();
+        AddLine(iPhoneOrg.FullName + " created!");
+      }
+
+      if(iPhoneFiltered.Exists == false)
+      {
+        iPhoneFiltered.Create();
+        AddLine(iPhoneFiltered.FullName + " created!");
+      }
+
+      if(Others.Exists == false)
+      {
+        Others.Create();
+        AddLine(Others.FullName + " created!");
+      }
+
+      for(int i = 0; i < FindFiles; i++)
+      {
+        string file_name = FileName[i];
+        string source_path = Directory;
+        string target_path = "";
+
+        if (file_name.Contains("IMG_"))
+        {
+          target_path = iPhone.FullName;
+        }
+        else
+        {
+          target_path = Others.FullName;
+        }
+
+        string source_file = System.IO.Path.Combine(source_path, file_name);
+        string dest_file = System.IO.Path.Combine(target_path, file_name);
+
+        System.IO.File.Move(source_file, dest_file);
+      }
     }
   }
 }
