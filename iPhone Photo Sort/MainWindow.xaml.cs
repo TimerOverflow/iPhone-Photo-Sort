@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using System.Windows.Forms;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace iPhone_Photo_Sort
 {
@@ -28,10 +28,11 @@ namespace iPhone_Photo_Sort
 
     private void button_Click(object sender, RoutedEventArgs e)
     {
-      FolderBrowserDialog fbd = new FolderBrowserDialog();
-      if( fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK )
+      CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+      dialog.IsFolderPicker = true;
+      if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
       {
-        
+        //label.Text = dialog.FileName; // 테스트용, 폴더 선택이 완료되면 선택된 폴더를 label에 출력
       }
     }
   }

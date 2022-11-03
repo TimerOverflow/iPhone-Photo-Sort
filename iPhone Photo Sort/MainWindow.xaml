@@ -11,6 +11,7 @@
       <ColumnDefinition Width="68*"/>
       <ColumnDefinition Width="413*"/>
     </Grid.ColumnDefinitions>
-    <Button x:Name="button" Grid.Column="1" Content="Button" HorizontalAlignment="Left" Margin="152,77,0,0" VerticalAlignment="Top" Click="button_Click"/>
+    <Button x:Name="FolderButton" Content="Button" HorizontalAlignment="Left" Margin="18,49,0,0" VerticalAlignment="Top" Click="button_Click" Grid.Column="1"/>
+    <Label x:Name="label" Grid.Column="1" Content="Label" HorizontalAlignment="Left" Margin="71,46,0,0" VerticalAlignment="Top" Background="White" Width="284"/>
   </Grid>
 </Window>
