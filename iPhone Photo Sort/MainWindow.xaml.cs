@@ -69,51 +69,71 @@ namespace iPhone_Photo_Sort
       DirectoryInfo iPhone = new DirectoryInfo(Directory + "\\iPhone");
       DirectoryInfo iPhoneOrg = new DirectoryInfo(Directory + "\\iPhone\\Org");
       DirectoryInfo iPhoneFiltered = new DirectoryInfo(Directory + "\\iPhone\\Filtered");
+      DirectoryInfo iPhoneAAE = new DirectoryInfo(Directory + "\\iPhone\\AAE");
       DirectoryInfo Others = new DirectoryInfo(Directory + "\\Others");
 
-      if(iPhone.Exists == false)
+      if (iPhone.Exists == false)
       {
         iPhone.Create();
         AddLine(iPhone.FullName + " created!");
       }
 
-      if(iPhoneOrg.Exists == false)
+      if (iPhoneOrg.Exists == false)
       {
         iPhoneOrg.Create();
         AddLine(iPhoneOrg.FullName + " created!");
       }
 
-      if(iPhoneFiltered.Exists == false)
+      if (iPhoneFiltered.Exists == false)
       {
         iPhoneFiltered.Create();
         AddLine(iPhoneFiltered.FullName + " created!");
       }
 
-      if(Others.Exists == false)
+      if (iPhoneAAE.Exists == false)
+      {
+        iPhoneAAE.Create();
+        AddLine(iPhoneAAE.FullName + " created!");
+      }
+
+      if (Others.Exists == false)
       {
         Others.Create();
         AddLine(Others.FullName + " created!");
       }
 
-      for(int i = 0; i < FindFiles; i++)
+      for (int i = 0; i < FindFiles; i++)
       {
         string file_name = FileName[i];
-        string source_path = Directory;
-        string target_path = "";
 
-        if (file_name.Contains("IMG_"))
+        if (file_name.Contains("IMG_E"))
         {
-          target_path = iPhone.FullName;
+          System.IO.File.Move(System.IO.Path.Combine(Directory, file_name), System.IO.Path.Combine(iPhoneFiltered.FullName, file_name));
+          System.IO.File.Move(System.IO.Path.Combine(Directory, file_name.Replace("E", "")), System.IO.Path.Combine(iPhoneOrg.FullName, file_name.Replace("E", "")));
+
+          FileName[i] = "";
+          FileName[Array.IndexOf(FileName, file_name.Replace("E", ""))] = "";
         }
-        else
+      }
+
+      for (int i = 0; i < FindFiles; i++)
+      {
+        string file_name = FileName[i];
+
+        if (System.IO.Path.GetExtension(file_name) == ".AAE")
         {
-          target_path = Others.FullName;
+          System.IO.File.Move(System.IO.Path.Combine(Directory, file_name), System.IO.Path.Combine(iPhoneAAE.FullName, file_name));
         }
-
-        string source_file = System.IO.Path.Combine(source_path, file_name);
-        string dest_file = System.IO.Path.Combine(target_path, file_name);
-
-        System.IO.File.Move(source_file, dest_file);
+        else if (file_name.Contains("IMG"))
+        {
+          System.IO.File.Move(System.IO.Path.Combine(Directory, file_name), System.IO.Path.Combine(iPhone.FullName, file_name));
+          //AddLine("iPhone " + file_name);
+        }
+        else if(file_name != "")
+        {
+          System.IO.File.Move(System.IO.Path.Combine(Directory, file_name), System.IO.Path.Combine(Others.FullName, file_name));
+          //AddLine("Others " + file_name);
+        }
       }
     }
   }
