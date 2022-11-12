@@ -110,6 +110,8 @@ namespace iPhone_Photo_Sort
           AddLine("Others " + file_name);
         }
       }
+
+      AddLine("sorting done.");
     }
 
     private void Button_Click_2(object sender, RoutedEventArgs e)
@@ -133,7 +135,7 @@ namespace iPhone_Photo_Sort
           FileName[FindFiles++] = file.Name;
         }
 
-        AddLine("total files : " + FindFiles.ToString());
+        AddLine("%d files found." + FindFiles.ToString());
       }
     }
   }

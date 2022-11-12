@@ -18,13 +18,14 @@
     <Grid.RowDefinitions>
       <RowDefinition Height="0.5*"/>
       <RowDefinition Height="0.6*"/>
-      <RowDefinition Height="0.5*"/>
+      <RowDefinition Height="0.3*"/>
       <RowDefinition/>
     </Grid.RowDefinitions>
     <Grid Grid.Row="1">
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="57*"/>
-        <ColumnDefinition Width="268*"/>
+        <ColumnDefinition Width="14*"/>
+        <ColumnDefinition Width="47*"/>
+        <ColumnDefinition Width="19*"/>
       </Grid.ColumnDefinitions>
 
       <Button x:Name="Button_FolderOpen"
@@ -37,7 +38,7 @@
         Kind="FolderOpen" />
       </Button>
 
-      <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0,20,0">
+      <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0,60,0" Grid.ColumnSpan="2">
         <TextBox x:Name="TextBox_Path"
           materialDesign:HintAssist.Hint="open image folder"
           AcceptsReturn="True"
@@ -52,12 +53,25 @@
           IsEnabled="{Binding IsChecked, ElementName=MaterialDesignOutlinedTextBoxEnabledComboBox}"
           Style="{StaticResource MaterialDesignOutlinedTextBox}"
           TextWrapping="Wrap"
-          VerticalScrollBarVisibility="Auto" Margin="60,38,60,29" Grid.Row="3" Foreground="White" BorderBrush="#BCFFFEFE" IsReadOnly="True" />
+          VerticalScrollBarVisibility="Auto" Margin="60,18,60,19" Grid.Row="3" Foreground="White" BorderBrush="#BCFFFEFE" IsReadOnly="True" />
 
-    <Button
-      Content="MID"
+    <Button x:Name="Button_Sort"
+      Content="SORT"
       IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
       Style="{StaticResource MaterialDesignFlatMidBgButton}"
-      ToolTip="MaterialDesignFlatMidButton" Margin="60,27,60,0" Grid.Row="2" VerticalAlignment="Top" Height="83" />
+      ToolTip="MaterialDesignFlatMidButton" Margin="60,5,60,0" Grid.Row="2" VerticalAlignment="Top" Height="60" Click="button_sort_Click" FontSize="36">
+    </Button>
+
+    <materialDesign:ColorZone
+      Padding="16"
+      materialDesign:ElevationAssist.Elevation="Dp4"
+      ClipToBounds="False"
+      Mode="PrimaryDark" VerticalAlignment="Stretch" Background="#FF673AB7">
+      <StackPanel
+        Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <TextBlock
+            Text="iPhone photo sort" FontSize="36" FontWeight="Bold" VerticalAlignment="Center" />
+      </StackPanel>
+    </materialDesign:ColorZone>
   </Grid>
 </Window>
