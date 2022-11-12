@@ -34,9 +34,9 @@ namespace iPhone_Photo_Sort
 
     public void AddLine(string text)
     {
-      richTextBox_MessageOutput.AppendText(text);
-      richTextBox_MessageOutput.AppendText("\u2028"); // Linebreak, not paragraph break
-      richTextBox_MessageOutput.ScrollToEnd();
+      //richTextBox_MessageOutput.AppendText(text);
+      //richTextBox_MessageOutput.AppendText("\u2028"); // Linebreak, not paragraph break
+      //richTextBox_MessageOutput.ScrollToEnd();
     } 
 
     public void button_Click(object sender, RoutedEventArgs e)
@@ -47,6 +47,7 @@ namespace iPhone_Photo_Sort
 
       if (openFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
       {
+        /*
         TextBox_Path.Text = openFileDialog.FileName;
         Directory = openFileDialog.FileName;
 
@@ -61,6 +62,7 @@ namespace iPhone_Photo_Sort
         }
 
         AddLine("total files : " + FindFiles.ToString());
+        */
       }
     }
 
@@ -135,6 +137,11 @@ namespace iPhone_Photo_Sort
           //AddLine("Others " + file_name);
         }
       }
+    }
+
+    private void Button_Click_2(object sender, RoutedEventArgs e)
+    {
+
     }
   }
 }
