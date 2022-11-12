@@ -135,7 +135,7 @@ namespace iPhone_Photo_Sort
           FileName[FindFiles++] = file.Name;
         }
 
-        AddLine(FindFiles.ToString() + "files found.");
+        AddLine(FindFiles.ToString() + " files found.");
       }
     }
   }
