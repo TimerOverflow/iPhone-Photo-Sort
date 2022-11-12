@@ -34,37 +34,10 @@ namespace iPhone_Photo_Sort
 
     public void AddLine(string text)
     {
-      //richTextBox_MessageOutput.AppendText(text);
-      //richTextBox_MessageOutput.AppendText("\u2028"); // Linebreak, not paragraph break
-      //richTextBox_MessageOutput.ScrollToEnd();
+      TextBox_MessageOutput.AppendText(text);
+      TextBox_MessageOutput.AppendText("\u2028"); // Linebreak, not paragraph break
+      TextBox_MessageOutput.ScrollToEnd();
     } 
-
-    public void button_Click(object sender, RoutedEventArgs e)
-    {
-      CommonOpenFileDialog openFileDialog = new CommonOpenFileDialog();
-
-      openFileDialog.IsFolderPicker = true;
-
-      if (openFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
-      {
-        /*
-        TextBox_Path.Text = openFileDialog.FileName;
-        Directory = openFileDialog.FileName;
-
-        var di = new DirectoryInfo(TextBox_Path.Text);
-        var files = di.EnumerateFiles();
-
-        FindFiles = 0;
-        foreach (var file in files)
-        {
-          AddLine(file.Name);
-          FileName[FindFiles++] = file.Name;
-        }
-
-        AddLine("total files : " + FindFiles.ToString());
-        */
-      }
-    }
 
     public void button_sort_Click(object sender, RoutedEventArgs e)
     {
@@ -129,19 +102,39 @@ namespace iPhone_Photo_Sort
         else if (file_name.Contains("IMG"))
         {
           System.IO.File.Move(System.IO.Path.Combine(Directory, file_name), System.IO.Path.Combine(iPhone.FullName, file_name));
-          //AddLine("iPhone " + file_name);
+          AddLine("iPhone " + file_name);
         }
         else if(file_name != "")
         {
           System.IO.File.Move(System.IO.Path.Combine(Directory, file_name), System.IO.Path.Combine(Others.FullName, file_name));
-          //AddLine("Others " + file_name);
+          AddLine("Others " + file_name);
         }
       }
     }
 
     private void Button_Click_2(object sender, RoutedEventArgs e)
     {
+      CommonOpenFileDialog openFileDialog = new CommonOpenFileDialog();
 
+      openFileDialog.IsFolderPicker = true;
+
+      if (openFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
+      {
+        TextBox_Path.Text = openFileDialog.FileName;
+        Directory = openFileDialog.FileName;
+
+        var di = new DirectoryInfo(TextBox_Path.Text);
+        var files = di.EnumerateFiles();
+
+        FindFiles = 0;
+        foreach (var file in files)
+        {
+          AddLine(file.Name);
+          FileName[FindFiles++] = file.Name;
+        }
+
+        AddLine("total files : " + FindFiles.ToString());
+      }
     }
   }
 }

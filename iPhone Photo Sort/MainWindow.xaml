@@ -13,11 +13,11 @@
         TextOptions.TextRenderingMode="Auto"
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource MaterialDesignFont}"
-        Title="iPhone Photo Sort" Height="480" Width="800">
-  <Grid Background="#FF303030" Margin="0,0,0,-100">
+        Title="iPhone Photo Sort" Height="685" Width="800">
+  <Grid Background="#FF303030" Margin="0,0,0,-3">
     <Grid.RowDefinitions>
       <RowDefinition Height="0.5*"/>
-      <RowDefinition/>
+      <RowDefinition Height="0.6*"/>
       <RowDefinition Height="0.5*"/>
       <RowDefinition/>
     </Grid.RowDefinitions>
@@ -27,10 +27,10 @@
         <ColumnDefinition Width="268*"/>
       </Grid.ColumnDefinitions>
 
-      <Button
+      <Button x:Name="Button_FolderOpen"
         IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
         Style="{StaticResource MaterialDesignFloatingActionButton}"
-        ToolTip="MaterialDesignFloatingActionButton" Margin="29,40,0,40" Click="Button_Click_2" HorizontalAlignment="Center" VerticalAlignment="Center">
+        ToolTip="MaterialDesignFloatingActionButton" Margin="60,0,0,0" Click="Button_Click_2" HorizontalAlignment="Left" VerticalAlignment="Center">
         <materialDesign:PackIcon
         Width="24"
         Height="24"
@@ -38,13 +38,26 @@
       </Button>
 
       <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0,20,0">
-        <TextBox
-          materialDesign:HintAssist.Hint="Floating hint in a box"
+        <TextBox x:Name="TextBox_Path"
+          materialDesign:HintAssist.Hint="open image folder"
           AcceptsReturn="True"
           IsEnabled="{Binding IsChecked, ElementName=MaterialDesignFilledTextBoxEnabledComboBox}"
           Style="{StaticResource MaterialDesignFilledTextBox}"
-          TextWrapping="Wrap" VerticalContentAlignment="Center" VerticalAlignment="Center" Background="#0FFFFBFB" Foreground="White" BorderBrush="#89FFFCFC" />
+          TextWrapping="Wrap" VerticalContentAlignment="Center" VerticalAlignment="Center" Background="#0FFFFBFB" Foreground="White" BorderBrush="#89FFFCFC" IsReadOnly="True" />
       </StackPanel>
     </Grid>
+    <TextBox x:Name="TextBox_MessageOutput"
+          materialDesign:HintAssist.Hint="Output"
+          AcceptsReturn="True"
+          IsEnabled="{Binding IsChecked, ElementName=MaterialDesignOutlinedTextBoxEnabledComboBox}"
+          Style="{StaticResource MaterialDesignOutlinedTextBox}"
+          TextWrapping="Wrap"
+          VerticalScrollBarVisibility="Auto" Margin="60,38,60,29" Grid.Row="3" Foreground="White" BorderBrush="#BCFFFEFE" IsReadOnly="True" />
+
+    <Button
+      Content="MID"
+      IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
+      Style="{StaticResource MaterialDesignFlatMidBgButton}"
+      ToolTip="MaterialDesignFlatMidButton" Margin="60,27,60,0" Grid.Row="2" VerticalAlignment="Top" Height="83" />
   </Grid>
 </Window>
