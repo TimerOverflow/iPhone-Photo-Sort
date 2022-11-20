@@ -4,27 +4,74 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:iPhone_Photo_Sort"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="iPhone Photo Sort" Height="353" Width="656">
-  <Grid Background="#FF3C3939">
-    <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="0*"/>
-      <ColumnDefinition/>
-    </Grid.ColumnDefinitions>
-    <Button x:Name="Button_path" Content="..." HorizontalAlignment="Left" Margin="36,124,0,0" VerticalAlignment="Top" Click="button_Click" Width="35" FontSize="18" Height="25" Grid.Column="1"/>
-    <RichTextBox x:Name="richTextBox_MessageOutput" Margin="36,200,36,17" Grid.Column="1">
-      <FlowDocument/>
-    </RichTextBox>
-    <TextBox x:Name="TextBox_Path" Grid.Column="1" HorizontalAlignment="Left" TextWrapping="Wrap" Text="select folder" VerticalAlignment="Top" Width="538" RenderTransformOrigin="0.5,0.5" Height="25" Margin="82,124,0,0">
-      <TextBox.RenderTransform>
-        <TransformGroup>
-          <ScaleTransform/>
-          <SkewTransform AngleX="0"/>
-          <RotateTransform/>
-          <TranslateTransform X="0"/>
-        </TransformGroup>
-      </TextBox.RenderTransform>
-    </TextBox>
-    <Button x:Name="button_sort" Content="SORT" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="36,169,0,0" VerticalAlignment="Top" Click="button_sort_Click"/>
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="Auto"
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{DynamicResource MaterialDesignFont}"
+        Title="iPhone Photo Sort" Height="685" Width="800">
+  <Grid Background="#FF303030" Margin="0,0,0,-3">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="0.5*"/>
+      <RowDefinition Height="0.6*"/>
+      <RowDefinition Height="0.3*"/>
+      <RowDefinition/>
+    </Grid.RowDefinitions>
+    <Grid Grid.Row="1">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="14*"/>
+        <ColumnDefinition Width="47*"/>
+        <ColumnDefinition Width="19*"/>
+      </Grid.ColumnDefinitions>
+
+      <Button x:Name="Button_FolderOpen"
+        IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
+        Style="{StaticResource MaterialDesignFloatingActionButton}"
+        ToolTip="MaterialDesignFloatingActionButton" Margin="60,0,0,0" Click="Button_Click_2" HorizontalAlignment="Left" VerticalAlignment="Center">
+        <materialDesign:PackIcon
+        Width="24"
+        Height="24"
+        Kind="FolderOpen" />
+      </Button>
+
+      <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0,60,0" Grid.ColumnSpan="2">
+        <TextBox x:Name="TextBox_Path"
+          materialDesign:HintAssist.Hint="open image folder"
+          AcceptsReturn="True"
+          IsEnabled="{Binding IsChecked, ElementName=MaterialDesignFilledTextBoxEnabledComboBox}"
+          Style="{StaticResource MaterialDesignFilledTextBox}"
+          TextWrapping="Wrap" VerticalContentAlignment="Center" VerticalAlignment="Center" Background="#0FFFFBFB" Foreground="White" BorderBrush="#89FFFCFC" IsReadOnly="True" />
+      </StackPanel>
+    </Grid>
+    <TextBox x:Name="TextBox_MessageOutput"
+          materialDesign:HintAssist.Hint="Output"
+          AcceptsReturn="True"
+          IsEnabled="{Binding IsChecked, ElementName=MaterialDesignOutlinedTextBoxEnabledComboBox}"
+          Style="{StaticResource MaterialDesignOutlinedTextBox}"
+          TextWrapping="Wrap"
+          VerticalScrollBarVisibility="Auto" Margin="60,18,60,19" Grid.Row="3" Foreground="White" BorderBrush="#BCFFFEFE" IsReadOnly="True" />
+
+    <Button x:Name="Button_Sort"
+      Content="SORT"
+      IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
+      Style="{StaticResource MaterialDesignFlatMidBgButton}"
+      ToolTip="MaterialDesignFlatMidButton" Margin="60,5,60,0" Grid.Row="2" VerticalAlignment="Top" Height="60" Click="button_sort_Click" FontSize="36">
+    </Button>
+
+    <materialDesign:ColorZone
+      Padding="16"
+      materialDesign:ElevationAssist.Elevation="Dp4"
+      ClipToBounds="False"
+      Mode="PrimaryDark" VerticalAlignment="Stretch" Background="#FF673AB7">
+      <StackPanel
+        Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <TextBlock
+            Text="iPhone photo sort" FontSize="36" FontWeight="Bold" VerticalAlignment="Center" />
+      </StackPanel>
+    </materialDesign:ColorZone>
   </Grid>
 </Window>
