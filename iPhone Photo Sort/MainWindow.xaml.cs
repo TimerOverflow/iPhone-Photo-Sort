@@ -80,14 +80,25 @@ namespace iPhone_Photo_Sort
       for (int i = 0; i < FindFiles; i++)
       {
         string file_name = FileName[i];
+        string org_file_name;
 
         if (file_name.Contains("IMG_E"))
         {
           System.IO.File.Move(System.IO.Path.Combine(Directory, file_name), System.IO.Path.Combine(iPhoneFiltered.FullName, file_name));
-          System.IO.File.Move(System.IO.Path.Combine(Directory, file_name.Replace("E", "")), System.IO.Path.Combine(iPhoneOrg.FullName, file_name.Replace("E", "")));
-
           FileName[i] = "";
-          FileName[Array.IndexOf(FileName, file_name.Replace("E", ""))] = "";
+          //Move Filtered Image
+
+          org_file_name = file_name.Replace("E", "");
+          if (System.IO.File.Exists(System.IO.Path.Combine(Directory, org_file_name)) == false)
+          {
+            AddLine(org_file_name + " is missing");
+          }
+          else
+          {
+            System.IO.File.Move(System.IO.Path.Combine(Directory, org_file_name), System.IO.Path.Combine(iPhoneOrg.FullName, org_file_name));
+            FileName[Array.IndexOf(FileName, org_file_name)] = "";
+          }
+          //Move Original Image
         }
       }
 
