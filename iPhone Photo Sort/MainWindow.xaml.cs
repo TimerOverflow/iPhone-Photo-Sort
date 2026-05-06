@@ -329,27 +329,46 @@ namespace iPhone_Photo_Sort
             }
         }
 
-        private void Button_Click_2(object sender, RoutedEventArgs e)
+        private async void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            CommonOpenFileDialog openFileDialog = new CommonOpenFileDialog();
-            openFileDialog.IsFolderPicker = true;
-
-            if (openFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            var dialog = new CommonOpenFileDialog();
+            dialog.IsFolderPicker = true;
+            
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                TextBox_Path.Text = openFileDialog.FileName;
-                _directory = openFileDialog.FileName;
+                _directory = dialog.FileName;
+                TextBox_Path.Text = _directory;
 
-                var di = new DirectoryInfo(TextBox_Path.Text);
-                var files = di.EnumerateFiles();
+                // UI 초기화
+                Button_FolderOpen.IsEnabled = false;
+                Button_Sort.IsEnabled = false;
+                ProgressBar_Status.Visibility = Visibility.Visible;
+                ProgressBar_Status.IsIndeterminate = true;
+                AddLine("파일 목록을 불러오는 중입니다...");
 
-                _fileNames.Clear();
-                foreach (var file in files)
+                try
                 {
-                    AddLine(file.Name);
-                    _fileNames.Add(file.Name);
-                }
+                    // 비동기적으로 파일 목록 로드
+                    _fileNames = await Task.Run(() => 
+                        System.IO.Directory.EnumerateFiles(_directory)
+                        .Where(f => !System.IO.Path.GetFileName(f).StartsWith(".")) // 숨김 파일 제외 (필요시)
+                        .Select(f => System.IO.Path.GetFileName(f))
+                        .ToList()
+                    );
 
-                AddLine(_fileNames.Count.ToString() + "개의 파일을 찾았습니다.");
+                    AddLine($"{_fileNames.Count}개의 파일을 찾았습니다.");
+                }
+                catch (Exception ex)
+                {
+                    AddLine($"파일 로드 중 오류 발생: {ex.Message}");
+                }
+                finally
+                {
+                    ProgressBar_Status.IsIndeterminate = false;
+                    ProgressBar_Status.Visibility = Visibility.Hidden;
+                    Button_FolderOpen.IsEnabled = true;
+                    Button_Sort.IsEnabled = true;
+                }
             }
         }
     }
