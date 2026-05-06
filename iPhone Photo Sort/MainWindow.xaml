@@ -16,16 +16,16 @@
         Title="iPhone Photo Sort" Height="685" Width="800">
   <Grid Background="#FF303030" Margin="0,0,0,-3">
     <Grid.RowDefinitions>
-      <RowDefinition Height="0.5*"/>
-      <RowDefinition Height="0.6*"/>
-      <RowDefinition Height="0.3*"/>
-      <RowDefinition/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
-    <Grid Grid.Row="1">
+    <Grid Grid.Row="1" Margin="0,30,0,15">
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="14*"/>
-        <ColumnDefinition Width="47*"/>
-        <ColumnDefinition Width="19*"/>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="*"/>
       </Grid.ColumnDefinitions>
 
       <Button x:Name="Button_FolderOpen"
@@ -38,7 +38,7 @@
         Kind="FolderOpen" />
       </Button>
 
-      <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0,60,0" Grid.ColumnSpan="2">
+      <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0,60,0">
         <TextBox x:Name="TextBox_Path"
           materialDesign:HintAssist.Hint="open image folder"
           AcceptsReturn="True"
@@ -47,7 +47,7 @@
           TextWrapping="Wrap" VerticalContentAlignment="Center" VerticalAlignment="Center" Background="#0FFFFBFB" Foreground="White" BorderBrush="#89FFFCFC" IsReadOnly="True" />
       </StackPanel>
     </Grid>
-    <Grid Grid.Row="3" Margin="60,10,60,19">
+    <Grid Grid.Row="3" Margin="60,10,60,30">
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto"/>
         <RowDefinition Height="*"/>
@@ -66,7 +66,7 @@
       Content="SORT"
       IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
       Style="{StaticResource MaterialDesignFlatMidBgButton}"
-      ToolTip="MaterialDesignFlatMidButton" Margin="60,5,60,0" Grid.Row="2" VerticalAlignment="Top" Height="60" Click="button_sort_Click" FontSize="36">
+      ToolTip="MaterialDesignFlatMidButton" Margin="60,15,60,15" Grid.Row="2" VerticalAlignment="Top" Height="60" Click="button_sort_Click" FontSize="36">
     </Button>
 
     <materialDesign:ColorZone
@@ -79,6 +79,15 @@
         <TextBlock
             Text="iPhone photo sort" FontSize="36" FontWeight="Bold" VerticalAlignment="Center" />
       </StackPanel>
+    </materialDesign:ColorZone>
+    <materialDesign:ColorZone Grid.Row="4"
+      Padding="8"
+      materialDesign:ElevationAssist.Elevation="Dp4"
+      Mode="PrimaryDark" Background="#FF673AB7">
+      <DockPanel LastChildFill="False">
+        <TextBlock x:Name="TextBlock_BuildTime" Text="Version: Unknown" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="10,0,0,0" Opacity="0.8" />
+        <TextBlock Text="Copyright © TimerOverFlow. All rights reserved." VerticalAlignment="Center" DockPanel.Dock="Right" Margin="0,0,10,0" Opacity="0.8" />
+      </DockPanel>
     </materialDesign:ColorZone>
   </Grid>
 </Window>

@@ -19,6 +19,21 @@ namespace iPhone_Photo_Sort
         public MainWindow()
         {
             InitializeComponent();
+            SetBuildVersion();
+        }
+
+        private void SetBuildVersion()
+        {
+            try
+            {
+                var filePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                var lastWriteTime = System.IO.File.GetLastWriteTime(filePath);
+                TextBlock_BuildTime.Text = $"Build: {lastWriteTime:yyyy.MM.dd HH:mm:ss}";
+            }
+            catch
+            {
+                TextBlock_BuildTime.Text = "Version: Developer Build";
+            }
         }
 
         public void AddLine(string text)
