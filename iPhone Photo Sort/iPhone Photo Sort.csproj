@@ -89,6 +89,8 @@
       <DependentUpon>ConflictResolutionDialog.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FileSortInfo.cs" />
+    <Compile Include="FolderTreeNode.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

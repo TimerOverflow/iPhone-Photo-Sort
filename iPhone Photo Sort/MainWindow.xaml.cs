@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,11 +16,13 @@ namespace iPhone_Photo_Sort
     {
         private string _directory = "";
         private List<string> _fileNames = new List<string>();
+        private ObservableCollection<FileSortInfo> _fileSortInfos = new ObservableCollection<FileSortInfo>();
 
         public MainWindow()
         {
             InitializeComponent();
             SetBuildVersion();
+            ListView_Files.ItemsSource = _fileSortInfos;
         }
 
         private void SetBuildVersion()
@@ -78,7 +81,96 @@ namespace iPhone_Photo_Sort
                 ProgressBar_Status.Visibility = Visibility.Hidden;
                 Button_Sort.IsEnabled = true;
                 Button_FolderOpen.IsEnabled = true;
+
+                // 정렬 완료 후 폴더 트리로 전환
+                BuildFolderTree();
             });
+        }
+
+        /// <summary>
+        /// 정렬 결과를 바탕으로 폴더 트리를 구축하고 TreeView에 표시합니다.
+        /// </summary>
+        private void BuildFolderTree()
+        {
+            var rootNodes = new ObservableCollection<FolderTreeNode>();
+
+            // FileSortInfo를 DestinationFolder 기준으로 그룹화
+            var sortedFiles = _fileSortInfos.Where(f => f.IsSorted).ToList();
+            var unsortedFiles = _fileSortInfos.Where(f => !f.IsSorted).ToList();
+
+            // 정렬된 파일들을 폴더별로 그룹화
+            var folderGroups = sortedFiles
+                .GroupBy(f => f.DestinationFolder ?? "Others")
+                .OrderBy(g => g.Key);
+
+            foreach (var group in folderGroups)
+            {
+                string fullPath = group.Key; // e.g. "iPhone 17 Pro/Filtered"
+                string[] parts = fullPath.Split('/');
+
+                // 최상위 폴더 찾기 또는 생성
+                FolderTreeNode currentNode = null;
+                ObservableCollection<FolderTreeNode> currentChildren = rootNodes;
+
+                foreach (string part in parts)
+                {
+                    var existingNode = currentChildren.FirstOrDefault(n => n.IsFolder && n.Name == part);
+                    if (existingNode == null)
+                    {
+                        existingNode = new FolderTreeNode
+                        {
+                            Name = part,
+                            IsFolder = true,
+                            IsExpanded = true
+                        };
+                        currentChildren.Add(existingNode);
+                    }
+                    currentNode = existingNode;
+                    currentChildren = currentNode.Children;
+                }
+
+                // 파일 노드 추가
+                foreach (var fileInfo in group.OrderBy(f => f.FileName))
+                {
+                    currentNode.Children.Add(new FolderTreeNode
+                    {
+                        Name = fileInfo.FileName,
+                        IsFolder = false,
+                        FileInfo = fileInfo
+                    });
+                }
+            }
+
+            // 미분류 파일이 있으면 별도 노드로 추가
+            if (unsortedFiles.Any())
+            {
+                var unsortedNode = new FolderTreeNode
+                {
+                    Name = "Unsorted",
+                    IsFolder = true,
+                    IsExpanded = false
+                };
+                foreach (var fileInfo in unsortedFiles.OrderBy(f => f.FileName))
+                {
+                    unsortedNode.Children.Add(new FolderTreeNode
+                    {
+                        Name = fileInfo.FileName,
+                        IsFolder = false,
+                        FileInfo = fileInfo
+                    });
+                }
+                rootNodes.Add(unsortedNode);
+            }
+
+            // ListView 숨기고 TreeView 표시
+            ListView_Files.Visibility = Visibility.Collapsed;
+            TreeView_Sorted.ItemsSource = rootNodes;
+            TreeView_Sorted.Visibility = Visibility.Visible;
+            TextBlock_FileListHeader.Text = "🌳 Sorted Folder Tree";
+
+            int totalSorted = sortedFiles.Count;
+            int totalUnsorted = unsortedFiles.Count;
+            TextBlock_FileCount.Text = $"{totalSorted} sorted, {totalUnsorted} unsorted";
         }
 
         private void SortFiles()
@@ -86,11 +178,28 @@ namespace iPhone_Photo_Sort
             Dictionary<string, DirectoryInfo> cameraDirectories = new Dictionary<string, DirectoryInfo>();
             int totalFiles = _fileNames.Count;
 
-            // 1. 디렉토리 구조 파악 및 생성
+            // 1. 디렉토리 구조 파악 및 생성 + 메타데이터 수집
             for (int i = 0; i < totalFiles; i++)
             {
                 string filePath = System.IO.Path.Combine(_directory, _fileNames[i]);
-                string cameraModel = GetCameraModel(filePath);
+                string cameraModel = null;
+
+                // FileSortInfo 찾기 및 메타데이터 수집
+                FileSortInfo info = null;
+                Dispatcher.Invoke(() =>
+                {
+                    info = _fileSortInfos.FirstOrDefault(x => x.FileName == _fileNames[i]);
+                });
+
+                if (info != null)
+                {
+                    CollectMetadata(filePath, info);
+                    cameraModel = info.CameraModel;
+                }
+                else
+                {
+                    cameraModel = GetCameraModel(filePath);
+                }
 
                 if (!string.IsNullOrEmpty(cameraModel))
                 {
@@ -112,7 +221,6 @@ namespace iPhone_Photo_Sort
             AddLine("디렉토리 준비 완료. 파일 이동을 시작합니다...");
 
             // IMG_E... 파일이 IMG_... 파일보다 먼저 처리되도록 내림차순 정렬
-            // 이렇게 하면 편집된 파일을 처리할 때 원본 파일을 찾아 Org 폴더로 먼저 옮길 수 있습니다.
             _fileNames.Sort((a, b) => string.Compare(b, a, StringComparison.OrdinalIgnoreCase));
 
             // 2. 파일 이동 처리
@@ -126,7 +234,14 @@ namespace iPhone_Photo_Sort
                 // 파일이 이미 다른 로직(MoveOriginalImage 등)에 의해 이동되었는지 확인
                 if (!System.IO.File.Exists(filePath)) continue;
 
-                string cameraModel = GetCameraModel(filePath);
+                // FileSortInfo 찾기
+                FileSortInfo info = null;
+                Dispatcher.Invoke(() =>
+                {
+                    info = _fileSortInfos.FirstOrDefault(x => x.FileName == fileName);
+                });
+
+                string cameraModel = info?.CameraModel ?? GetCameraModel(filePath);
                 DirectoryInfo targetDirectory = null;
 
                 if (!string.IsNullOrEmpty(cameraModel) && cameraDirectories.ContainsKey(cameraModel))
@@ -154,12 +269,15 @@ namespace iPhone_Photo_Sort
                             if (!filteredDir.Exists) filteredDir.Create();
                             
                             MoveFileSafe(filePath, System.IO.Path.Combine(filteredDir.FullName, fileName));
-                            _fileNames[i] = ""; // 현재 파일 처리 완료
+                            _fileNames[i] = "";
+
+                            // 분류 정보 기록
+                            UpdateSortInfo(info, $"{targetDirectory.Name}/Filtered",
+                                $"Edited file (IMG_E prefix) → Filtered folder");
 
                             // 원본 파일(IMG_...)을 찾아 Org 폴더로 이동
                             if (!MoveOriginalImage(fileName, _directory, targetDirectory.FullName, true))
                             {
-                                // 이미 기종 폴더 루트로 이동된 경우를 대비해 재시도
                                 MoveOriginalImage(fileName, targetDirectory.FullName, targetDirectory.FullName, false);
                             }
                         }
@@ -169,14 +287,24 @@ namespace iPhone_Photo_Sort
                             if (!aaeDir.Exists) aaeDir.Create();
                             
                             MoveFileSafe(filePath, System.IO.Path.Combine(aaeDir.FullName, fileName));
+                            UpdateSortInfo(info, $"{targetDirectory.Name}/AAE",
+                                "Apple AAE sidecar file → AAE folder");
                         }
                         else if (fileName.StartsWith("IMG", StringComparison.OrdinalIgnoreCase))
                         {
                             MoveFileSafe(filePath, System.IO.Path.Combine(targetDirectory.FullName, fileName));
+                            string reason = !string.IsNullOrEmpty(cameraModel) 
+                                ? $"Camera model: {cameraModel} → {targetDirectory.Name} folder" 
+                                : "No camera metadata found → Others folder";
+                            UpdateSortInfo(info, targetDirectory.Name, reason);
                         }
                         else
                         {
                             MoveFileSafe(filePath, System.IO.Path.Combine(targetDirectory.FullName, fileName));
+                            string reason = !string.IsNullOrEmpty(cameraModel) 
+                                ? $"Camera model: {cameraModel} → {targetDirectory.Name} folder" 
+                                : "No camera metadata found → Others folder";
+                            UpdateSortInfo(info, targetDirectory.Name, reason);
                         }
                     }
                     catch (Exception ex)
@@ -185,6 +313,117 @@ namespace iPhone_Photo_Sort
                     }
                 }
                 UpdateProgress(i + 1, totalFiles);
+            }
+        }
+
+        private void UpdateSortInfo(FileSortInfo info, string destination, string reason)
+        {
+            if (info == null) return;
+            Dispatcher.Invoke(() =>
+            {
+                info.DestinationFolder = destination;
+                info.SortingReason = reason;
+                info.IsSorted = true;
+            });
+        }
+
+        /// <summary>
+        /// 파일에서 주요 메타데이터를 한 번에 수집하여 FileSortInfo에 저장합니다.
+        /// </summary>
+        private void CollectMetadata(string filePath, FileSortInfo info)
+        {
+            try
+            {
+                var directories = ImageMetadataReader.ReadMetadata(filePath);
+                
+                foreach (var dir in directories)
+                {
+                    foreach (var tag in dir.Tags)
+                    {
+                        string tagName = tag.Name;
+                        string tagValue = tag.Description;
+                        if (string.IsNullOrWhiteSpace(tagValue)) continue;
+
+                        // Camera Model
+                        if (string.IsNullOrEmpty(info.CameraModel) &&
+                            tagName.IndexOf("Model", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                            tagName.IndexOf("Color", StringComparison.OrdinalIgnoreCase) < 0)
+                        {
+                            info.CameraModel = tagValue.Trim();
+                        }
+
+                        // Exposure Time / Shutter Speed
+                        if (string.IsNullOrEmpty(info.Exposure) &&
+                            (tagName.Equals("Exposure Time", StringComparison.OrdinalIgnoreCase) ||
+                             tagName.Equals("Shutter Speed Value", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            info.Exposure = tagValue.Trim();
+                        }
+
+                        // F-Number
+                        if (string.IsNullOrEmpty(info.FNumber) &&
+                            (tagName.Equals("F-Number", StringComparison.OrdinalIgnoreCase) ||
+                             tagName.Equals("Aperture Value", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            info.FNumber = tagValue.Trim();
+                        }
+
+                        // ISO
+                        if (string.IsNullOrEmpty(info.ISO) &&
+                            tagName.IndexOf("ISO", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                            tagName.IndexOf("Offset", StringComparison.OrdinalIgnoreCase) < 0)
+                        {
+                            info.ISO = tagValue.Trim();
+                        }
+
+                        // Focal Length
+                        if (string.IsNullOrEmpty(info.FocalLength) &&
+                            tagName.Equals("Focal Length", StringComparison.OrdinalIgnoreCase))
+                        {
+                            info.FocalLength = tagValue.Trim();
+                        }
+
+                        // Date/Time Original
+                        if (string.IsNullOrEmpty(info.DateTaken) &&
+                            (tagName.Equals("Date/Time Original", StringComparison.OrdinalIgnoreCase) ||
+                             tagName.Equals("Date/Time", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            info.DateTaken = tagValue.Trim();
+                        }
+
+                        // Resolution (Image Width x Height)
+                        if (tagName.Equals("Image Width", StringComparison.OrdinalIgnoreCase) ||
+                            tagName.Equals("Exif Image Width", StringComparison.OrdinalIgnoreCase))
+                        {
+                            string width = tagValue.Trim().Replace(" pixels", "");
+                            if (!string.IsNullOrEmpty(info.Resolution) && info.Resolution.Contains("x"))
+                            {
+                                // Height가 이미 저장된 경우
+                            }
+                            else
+                            {
+                                info.Resolution = width + " x ";
+                            }
+                        }
+                        if (tagName.Equals("Image Height", StringComparison.OrdinalIgnoreCase) ||
+                            tagName.Equals("Exif Image Height", StringComparison.OrdinalIgnoreCase))
+                        {
+                            string height = tagValue.Trim().Replace(" pixels", "");
+                            if (!string.IsNullOrEmpty(info.Resolution) && info.Resolution.EndsWith(" x "))
+                            {
+                                info.Resolution += height;
+                            }
+                            else
+                            {
+                                info.Resolution = "? x " + height;
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // 메타데이터 파싱 실패 시 무시
             }
         }
 
@@ -250,7 +489,6 @@ namespace iPhone_Photo_Sort
             string orgBaseName = "IMG_" + numberPart; // "IMG_1234"
             
             // sourceDirectory에서 orgBaseName으로 시작하는 모든 파일 찾기 (확장자 상관없이)
-            // 예: IMG_1234.HEIC, IMG_1234.MOV, IMG_1234.AAE 등
             DirectoryInfo di = new DirectoryInfo(sourceDirectory);
             if (!di.Exists) return false;
 
@@ -285,6 +523,20 @@ namespace iPhone_Photo_Sort
                 {
                     _fileNames[index] = "";
                 }
+
+                // FileSortInfo 업데이트
+                FileSortInfo orgInfo = null;
+                string parentFolderName = new DirectoryInfo(DestinationDirectory).Name;
+                Dispatcher.Invoke(() =>
+                {
+                    orgInfo = _fileSortInfos.FirstOrDefault(x => x.FileName.Equals(file.Name, StringComparison.OrdinalIgnoreCase));
+                });
+
+                string reason = subFolderName == "AAE"
+                    ? $"AAE sidecar of edited file {filteredFileName} → AAE folder"
+                    : $"Original of edited file {filteredFileName} → Org folder";
+                UpdateSortInfo(orgInfo, $"{parentFolderName}/{subFolderName}", reason);
+
                 found = true;
             }
 
@@ -344,6 +596,14 @@ namespace iPhone_Photo_Sort
                 Button_Sort.IsEnabled = false;
                 ProgressBar_Status.Visibility = Visibility.Visible;
                 ProgressBar_Status.IsIndeterminate = true;
+                _fileSortInfos.Clear();
+
+                // 트리뷰가 표시 중이면 다시 리스트뷰로 전환
+                TreeView_Sorted.Visibility = Visibility.Collapsed;
+                TreeView_Sorted.ItemsSource = null;
+                ListView_Files.Visibility = Visibility.Visible;
+                TextBlock_FileListHeader.Text = "📋 File List";
+
                 AddLine("파일 목록을 불러오는 중입니다...");
 
                 try
@@ -351,12 +611,37 @@ namespace iPhone_Photo_Sort
                     // 비동기적으로 파일 목록 로드
                     _fileNames = await Task.Run(() => 
                         System.IO.Directory.EnumerateFiles(_directory)
-                        .Where(f => !System.IO.Path.GetFileName(f).StartsWith(".")) // 숨김 파일 제외 (필요시)
+                        .Where(f => !System.IO.Path.GetFileName(f).StartsWith("."))
                         .Select(f => System.IO.Path.GetFileName(f))
                         .ToList()
                     );
 
+                    // FileSortInfo 리스트 생성 및 ListView에 바인딩
+                    foreach (var fileName in _fileNames)
+                    {
+                        string fullPath = System.IO.Path.Combine(_directory, fileName);
+                        long fileBytes = 0;
+                        try { fileBytes = new FileInfo(fullPath).Length; } catch { }
+
+                        string fileSizeStr;
+                        if (fileBytes >= 1024 * 1024)
+                            fileSizeStr = $"{fileBytes / (1024.0 * 1024.0):F1} MB";
+                        else if (fileBytes >= 1024)
+                            fileSizeStr = $"{fileBytes / 1024.0:F1} KB";
+                        else
+                            fileSizeStr = $"{fileBytes} B";
+
+                        _fileSortInfos.Add(new FileSortInfo
+                        {
+                            FileName = fileName,
+                            OriginalPath = fullPath,
+                            FileSize = fileSizeStr,
+                            IsSorted = false
+                        });
+                    }
+
                     AddLine($"{_fileNames.Count}개의 파일을 찾았습니다.");
+                    TextBlock_FileCount.Text = $"{_fileNames.Count} files";
                 }
                 catch (Exception ex)
                 {

@@ -13,62 +13,15 @@
         TextOptions.TextRenderingMode="Auto"
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource MaterialDesignFont}"
-        Title="iPhone Photo Sort" Height="685" Width="800">
+        Title="iPhone Photo Sort" Height="685" Width="1200">
   <Grid Background="#FF303030" Margin="0,0,0,-3">
     <Grid.RowDefinitions>
-      <RowDefinition Height="Auto"/>
-      <RowDefinition Height="Auto"/>
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="*"/>
       <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
-    <Grid Grid.Row="1" Margin="0,30,0,15">
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="Auto"/>
-        <ColumnDefinition Width="*"/>
-      </Grid.ColumnDefinitions>
 
-      <Button x:Name="Button_FolderOpen"
-        IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
-        Style="{StaticResource MaterialDesignFloatingActionButton}"
-        ToolTip="MaterialDesignFloatingActionButton" Margin="60,0,0,0" Click="Button_Click_2" HorizontalAlignment="Left" VerticalAlignment="Center">
-        <materialDesign:PackIcon
-        Width="24"
-        Height="24"
-        Kind="FolderOpen" />
-      </Button>
-
-      <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0,60,0">
-        <TextBox x:Name="TextBox_Path"
-          materialDesign:HintAssist.Hint="open image folder"
-          AcceptsReturn="True"
-          IsEnabled="{Binding IsChecked, ElementName=MaterialDesignFilledTextBoxEnabledComboBox}"
-          Style="{StaticResource MaterialDesignFilledTextBox}"
-          TextWrapping="Wrap" VerticalContentAlignment="Center" VerticalAlignment="Center" Background="#0FFFFBFB" Foreground="White" BorderBrush="#89FFFCFC" IsReadOnly="True" />
-      </StackPanel>
-    </Grid>
-    <Grid Grid.Row="3" Margin="60,10,60,30">
-      <Grid.RowDefinitions>
-        <RowDefinition Height="Auto"/>
-        <RowDefinition Height="*"/>
-      </Grid.RowDefinitions>
-      <ProgressBar x:Name="ProgressBar_Status" Minimum="0" Maximum="100" Height="10" Margin="0,0,0,10" Visibility="Hidden" />
-      <TextBox x:Name="TextBox_MessageOutput"
-            materialDesign:HintAssist.Hint="Output"
-            AcceptsReturn="True"
-            IsEnabled="{Binding IsChecked, ElementName=MaterialDesignOutlinedTextBoxEnabledComboBox}"
-            Style="{StaticResource MaterialDesignOutlinedTextBox}"
-            TextWrapping="Wrap"
-            VerticalScrollBarVisibility="Auto" Grid.Row="1" Foreground="White" BorderBrush="#BCFFFEFE" IsReadOnly="True" />
-    </Grid>
-
-    <Button x:Name="Button_Sort"
-      Content="SORT"
-      IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
-      Style="{StaticResource MaterialDesignFlatMidBgButton}"
-      ToolTip="MaterialDesignFlatMidButton" Margin="60,15,60,15" Grid.Row="2" VerticalAlignment="Top" Height="60" Click="button_sort_Click" FontSize="36">
-    </Button>
-
+    <!-- Row 0: Title Bar -->
     <materialDesign:ColorZone
       Padding="16"
       materialDesign:ElevationAssist.Elevation="Dp4"
@@ -80,7 +33,191 @@
             Text="iPhone photo sort" FontSize="36" FontWeight="Bold" VerticalAlignment="Center" />
       </StackPanel>
     </materialDesign:ColorZone>
-    <materialDesign:ColorZone Grid.Row="4"
+
+    <!-- Row 1: Main Content (Left + Right) -->
+    <Grid Grid.Row="1" Margin="0,10,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" MinWidth="350"/>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="350" MinWidth="200"/>
+      </Grid.ColumnDefinitions>
+
+      <!-- Left Panel: 기존 UI -->
+      <Grid Grid.Column="0">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 폴더 선택 -->
+        <Grid Grid.Row="0" Margin="0,20,0,15">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+
+          <Button x:Name="Button_FolderOpen"
+            IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
+            Style="{StaticResource MaterialDesignFloatingActionButton}"
+            ToolTip="MaterialDesignFloatingActionButton" Margin="60,0,0,0" Click="Button_Click_2" HorizontalAlignment="Left" VerticalAlignment="Center">
+            <materialDesign:PackIcon
+            Width="24"
+            Height="24"
+            Kind="FolderOpen" />
+          </Button>
+
+          <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0,20,0">
+            <TextBox x:Name="TextBox_Path"
+              materialDesign:HintAssist.Hint="open image folder"
+              AcceptsReturn="True"
+              IsEnabled="{Binding IsChecked, ElementName=MaterialDesignFilledTextBoxEnabledComboBox}"
+              Style="{StaticResource MaterialDesignFilledTextBox}"
+              TextWrapping="Wrap" VerticalContentAlignment="Center" VerticalAlignment="Center" Background="#0FFFFBFB" Foreground="White" BorderBrush="#89FFFCFC" IsReadOnly="True" />
+          </StackPanel>
+        </Grid>
+
+        <!-- SORT 버튼 -->
+        <Button x:Name="Button_Sort" Grid.Row="1"
+          Content="SORT"
+          IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
+          Style="{StaticResource MaterialDesignFlatMidBgButton}"
+          ToolTip="MaterialDesignFlatMidButton" Margin="60,15,20,15" VerticalAlignment="Top" Height="60" Click="button_sort_Click" FontSize="36">
+        </Button>
+
+        <!-- Output 로그 + ProgressBar -->
+        <Grid Grid.Row="2" Margin="60,10,20,30">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+          </Grid.RowDefinitions>
+          <ProgressBar x:Name="ProgressBar_Status" Minimum="0" Maximum="100" Height="10" Margin="0,0,0,10" Visibility="Hidden" />
+          <TextBox x:Name="TextBox_MessageOutput"
+                materialDesign:HintAssist.Hint="Output"
+                AcceptsReturn="True"
+                IsEnabled="{Binding IsChecked, ElementName=MaterialDesignOutlinedTextBoxEnabledComboBox}"
+                Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                TextWrapping="Wrap"
+                VerticalScrollBarVisibility="Auto" Grid.Row="1" Foreground="White" BorderBrush="#BCFFFEFE" IsReadOnly="True" />
+        </Grid>
+      </Grid>
+
+      <!-- GridSplitter -->
+      <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="#55FFFFFF" Cursor="SizeWE" />
+
+      <!-- Right Panel: 파일 리스트 / 폴더 트리 -->
+      <Grid Grid.Column="2" Margin="5,20,20,30">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 헤더 -->
+        <TextBlock x:Name="TextBlock_FileListHeader" Text="📋 File List" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="10,0,0,10"/>
+
+        <!-- SORT 전: 플랫 파일 리스트 (ListView) -->
+        <ListView x:Name="ListView_Files" Grid.Row="1"
+                  Background="#FF3A3A3A"
+                  BorderBrush="#55FFFFFF"
+                  BorderThickness="1"
+                  Foreground="White"
+                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+          <ListView.ItemTemplate>
+            <DataTemplate>
+              <Border Background="Transparent" Padding="4,2"
+                      ToolTipService.ShowDuration="30000"
+                      ToolTipService.InitialShowDelay="200">
+                <Border.ToolTip>
+                  <ToolTip MaxWidth="420">
+                    <Border Background="#FF2D2D2D" Padding="10" CornerRadius="4">
+                      <TextBlock Text="{Binding MetadataTooltip}" FontFamily="Consolas" FontSize="12"
+                                 Foreground="#EEFFFFFF" TextWrapping="Wrap"/>
+                    </Border>
+                  </ToolTip>
+                </Border.ToolTip>
+                <Grid Opacity="{Binding StatusOpacity}">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Text="{Binding StatusIcon}" Margin="0,0,8,0" VerticalAlignment="Center" FontSize="14"/>
+                  <TextBlock Grid.Column="1" Text="{Binding FileName}" VerticalAlignment="Center" FontSize="12"
+                             TextTrimming="CharacterEllipsis"/>
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ListView.ItemTemplate>
+          <ListView.ItemContainerStyle>
+            <Style TargetType="ListViewItem">
+              <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+              <Setter Property="Padding" Value="2"/>
+              <Setter Property="Margin" Value="0,0"/>
+              <Setter Property="Background" Value="Transparent"/>
+              <Setter Property="Foreground" Value="White"/>
+              <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                  <Setter Property="Background" Value="#55673AB7"/>
+                </Trigger>
+              </Style.Triggers>
+            </Style>
+          </ListView.ItemContainerStyle>
+        </ListView>
+
+        <!-- SORT 후: 폴더 트리 (TreeView) -->
+        <TreeView x:Name="TreeView_Sorted" Grid.Row="1"
+                  Background="#FF3A3A3A"
+                  BorderBrush="#55FFFFFF"
+                  BorderThickness="1"
+                  Foreground="White"
+                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                  Visibility="Collapsed">
+          <TreeView.Resources>
+            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF673AB7"/>
+            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#88673AB7"/>
+          </TreeView.Resources>
+          <TreeView.ItemTemplate>
+            <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+              <Border Background="Transparent" Padding="3,2"
+                      ToolTipService.ShowDuration="30000"
+                      ToolTipService.InitialShowDelay="200">
+                <Border.ToolTip>
+                  <ToolTip MaxWidth="420">
+                    <Border Background="#FF2D2D2D" Padding="10" CornerRadius="4">
+                      <TextBlock Text="{Binding ToolTipText}" FontFamily="Consolas" FontSize="12"
+                                 Foreground="#EEFFFFFF" TextWrapping="Wrap"/>
+                    </Border>
+                  </ToolTip>
+                </Border.ToolTip>
+                <StackPanel Orientation="Horizontal">
+                  <TextBlock Text="{Binding Icon}" Margin="0,0,6,0" VerticalAlignment="Center" FontSize="13"/>
+                  <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" FontSize="12"/>
+                </StackPanel>
+              </Border>
+            </HierarchicalDataTemplate>
+          </TreeView.ItemTemplate>
+          <TreeView.ItemContainerStyle>
+            <Style TargetType="TreeViewItem">
+              <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+              <Setter Property="Foreground" Value="White"/>
+              <Setter Property="Padding" Value="2,1"/>
+              <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                  <Setter Property="Background" Value="#33673AB7"/>
+                </Trigger>
+              </Style.Triggers>
+            </Style>
+          </TreeView.ItemContainerStyle>
+        </TreeView>
+
+        <!-- 파일 수 표시 -->
+        <TextBlock x:Name="TextBlock_FileCount" Grid.Row="2" Text="0 files" Foreground="#AAFFFFFF" FontSize="11" Margin="10,8,0,0" HorizontalAlignment="Left"/>
+      </Grid>
+    </Grid>
+
+    <!-- Row 2: Footer -->
+    <materialDesign:ColorZone Grid.Row="2"
       Padding="8"
       materialDesign:ElevationAssist.Elevation="Dp4"
       Mode="PrimaryDark" Background="#FF673AB7">
