@@ -29,18 +29,22 @@
 ### 1. Launch the Application
 Run `iPhone Photo Sort.exe`. You will be greeted by a modern, dark-themed user interface.
 
-![Initial UI](screenshot_initial.png)
-
 ### 2. Select Source Folder
 Click the **Folder Icon** button at the top to select the directory containing your media files. The file list will load asynchronously.
 
+<img width="1173" height="671" alt="image" src="https://github.com/user-attachments/assets/b212a64b-1357-4b94-84de-41c6ed7358e9" />
+
 ### 3. Execute Sorting (SORT)
 Click the large **SORT** button. The application will analyze metadata and move files in real-time. You can monitor progress via the status bar at the bottom.
+
+<img width="1177" height="669" alt="image" src="https://github.com/user-attachments/assets/0c7fadca-72d0-4997-a1c5-dc0b4ec28976" />
 
 ### 4. Review Results
 After sorting, the right-hand panel switches to the **Sorted Folder Tree**.
 - Expand or collapse folders to review the organized structure.
 - Hover over any file to view a **ToolTip** containing detailed metadata and the **Sorting Reason**.
+
+<img width="442" height="537" alt="image" src="https://github.com/user-attachments/assets/521d32b2-6aed-49be-b8df-2df65068d0aa" />
 
 ---
 
