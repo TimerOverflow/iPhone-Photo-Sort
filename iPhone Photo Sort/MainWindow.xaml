@@ -94,8 +94,10 @@
           <ProgressBar x:Name="ProgressBar_Status" Minimum="0" Maximum="100" Height="10" Margin="0,0,0,10" Visibility="Hidden" />
           <TextBox x:Name="TextBox_MessageOutput"
                 materialDesign:HintAssist.Hint="Output"
+                materialDesign:HintAssist.IsFloating="True"
+                materialDesign:HintAssist.Background="#FF303030"
                 AcceptsReturn="True"
-                IsEnabled="{Binding IsChecked, ElementName=MaterialDesignOutlinedTextBoxEnabledComboBox}"
+                IsEnabled="True"
                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
                 TextWrapping="Wrap"
                 VerticalScrollBarVisibility="Auto" Grid.Row="1" Foreground="White" BorderBrush="#BCFFFEFE" IsReadOnly="True" />

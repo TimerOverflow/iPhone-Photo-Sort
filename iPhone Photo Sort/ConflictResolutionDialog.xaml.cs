@@ -17,7 +17,7 @@ namespace iPhone_Photo_Sort
         public ConflictResolutionDialog(string fileName)
         {
             InitializeComponent();
-            MessageTextBlock.Text = $"대상 폴더에 이미 동일한 이름의 파일이 존재합니다:\n{fileName}\n\n어떻게 처리하시겠습니까?";
+            MessageTextBlock.Text = $"The file already exists in the destination folder:\n{fileName}\n\nHow would you like to proceed?";
         }
 
         private void OverwriteButton_Click(object sender, RoutedEventArgs e)

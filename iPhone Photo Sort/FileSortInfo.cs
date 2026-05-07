@@ -85,7 +85,7 @@ namespace iPhone_Photo_Sort
             get
             {
                 if (!IsSorted)
-                    return "ℹ️ SORT를 실행하면 상세 메타데이터를 확인할 수 있습니다.";
+                    return "ℹ️ Run SORT to view detailed metadata.";
 
                 string tooltip = 
                     $"📷 Camera: {CameraModel ?? "Unknown"}\n";

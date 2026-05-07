@@ -66,21 +66,21 @@ namespace iPhone_Photo_Sort
         {
             if (string.IsNullOrEmpty(_directory) || _fileNames.Count == 0)
             {
-                MessageBox.Show("폴더를 먼저 선택해주세요.");
+                MessageBox.Show("Please select a folder first.");
                 return;
             }
 
             Button_Sort.IsEnabled = false;
             Button_FolderOpen.IsEnabled = false;
-            AddLine("카메라 모델별로 사진/영상을 정리합니다...");
+            AddLine("Sorting photos and videos by camera model...");
 
             await Task.Run(() => SortFiles());
 
-            AddLine("정리가 완료되었습니다.");
+            AddLine("Sorting completed.");
 
             // 정렬 이력을 파일로 저장
             await Task.Run(() => SaveSortHistory());
-            AddLine("정렬 이력이 저장되었습니다.");
+            AddLine("Sort history saved.");
 
             Dispatcher.Invoke(() =>
             {
@@ -216,7 +216,7 @@ namespace iPhone_Photo_Sort
                         if (!cameraDirInfo.Exists)
                         {
                             cameraDirInfo.Create();
-                            AddLine($"{cameraModel} 디렉토리를 생성했습니다: {cameraDirInfo.FullName}");
+                            AddLine($"Created directory for {cameraModel}: {cameraDirInfo.FullName}");
                         }
                         cameraDirectories.Add(cameraModel, cameraDirInfo);
                     }
@@ -224,7 +224,7 @@ namespace iPhone_Photo_Sort
                 UpdateProgress(i + 1, totalFiles);
             }
 
-            AddLine("디렉토리 준비 완료. 파일 이동을 시작합니다...");
+            AddLine("Directories ready. Starting file migration...");
 
             // IMG_E... 파일이 IMG_... 파일보다 먼저 처리되도록 내림차순 정렬
             _fileNames.Sort((a, b) => string.Compare(b, a, StringComparison.OrdinalIgnoreCase));
@@ -260,7 +260,7 @@ namespace iPhone_Photo_Sort
                     if (!othersDir.Exists)
                     {
                         othersDir.Create();
-                        AddLine("Others 디렉토리를 생성했습니다: " + othersDir.FullName);
+                        AddLine("Created 'Others' directory: " + othersDir.FullName);
                     }
                     targetDirectory = othersDir;
                 }
@@ -480,7 +480,7 @@ namespace iPhone_Photo_Sort
 
                 if (resolution == ConflictResolution.Skip)
                 {
-                    AddLine($"{System.IO.Path.GetFileName(destPath)} 덮어쓰기 건너뜀.");
+                    AddLine($"Skipped overwriting {System.IO.Path.GetFileName(destPath)}.");
                     return;
                 }
                 else if (resolution == ConflictResolution.Overwrite)
@@ -573,7 +573,7 @@ namespace iPhone_Photo_Sort
 
             if (!found && !silent)
             {
-                AddLine($"{orgBaseName}.* 원본 파일이 없습니다.");
+                AddLine($"Original file {orgBaseName}.* not found.");
             }
             return found;
         }
@@ -635,7 +635,7 @@ namespace iPhone_Photo_Sort
                 ListView_Files.Visibility = Visibility.Visible;
                 TextBlock_FileListHeader.Text = "📋 File List";
 
-                AddLine("파일 목록을 불러오는 중입니다...");
+                AddLine("Loading file list...");
 
                 try
                 {
@@ -645,14 +645,14 @@ namespace iPhone_Photo_Sort
 
                     if (System.IO.File.Exists(historyPath))
                     {
-                        AddLine("기존 정렬 이력을 발견했습니다. 불러오는 중...");
+                        AddLine("Found existing sort history. Loading...");
                         historyLoaded = await Task.Run(() => LoadSortHistory(historyPath));
                     }
 
                     if (historyLoaded)
                     {
                         // 이력 로드 성공: 트리뷰로 표시, SORT 비활성화
-                        AddLine($"정렬 이력을 불러왔습니다. ({_fileSortInfos.Count}개 파일)");
+                        AddLine($"Sort history loaded. ({_fileSortInfos.Count} files)");
                         TextBlock_FileCount.Text = $"{_fileSortInfos.Count} files (from history)";
                         BuildFolderTree();
 
@@ -694,7 +694,7 @@ namespace iPhone_Photo_Sort
                             });
                         }
 
-                        AddLine($"{_fileNames.Count}개의 파일을 찾았습니다.");
+                        AddLine($"Found {_fileNames.Count} files.");
                         TextBlock_FileCount.Text = $"{_fileNames.Count} files";
 
                         ProgressBar_Status.IsIndeterminate = false;
@@ -705,7 +705,7 @@ namespace iPhone_Photo_Sort
                 }
                 catch (Exception ex)
                 {
-                    AddLine($"파일 로드 중 오류 발생: {ex.Message}");
+                    AddLine($"Error loading files: {ex.Message}");
                     ProgressBar_Status.IsIndeterminate = false;
                     ProgressBar_Status.Visibility = Visibility.Hidden;
                     Button_FolderOpen.IsEnabled = true;
@@ -750,7 +750,7 @@ namespace iPhone_Photo_Sort
             }
             catch (Exception ex)
             {
-                AddLine($"정렬 이력 저장 실패: {ex.Message}");
+                AddLine($"Failed to save sort history: {ex.Message}");
             }
         }
 
@@ -781,13 +781,13 @@ namespace iPhone_Photo_Sort
                     }
                 });
 
-                AddLine($"정렬 일시: {history.SortedAt}");
-                AddLine($"앱 버전: {history.AppVersion}");
+                AddLine($"Sorted at: {history.SortedAt}");
+                AddLine($"App version: {history.AppVersion}");
                 return true;
             }
             catch (Exception ex)
             {
-                AddLine($"정렬 이력 로드 실패: {ex.Message}");
+                AddLine($"Failed to load sort history: {ex.Message}");
                 return false;
             }
         }
