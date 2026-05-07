@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using Microsoft.WindowsAPICodePack.Dialogs;
@@ -76,10 +77,15 @@ namespace iPhone_Photo_Sort
             await Task.Run(() => SortFiles());
 
             AddLine("정리가 완료되었습니다.");
+
+            // 정렬 이력을 파일로 저장
+            await Task.Run(() => SaveSortHistory());
+            AddLine("정렬 이력이 저장되었습니다.");
+
             Dispatcher.Invoke(() =>
             {
                 ProgressBar_Status.Visibility = Visibility.Hidden;
-                Button_Sort.IsEnabled = true;
+                Button_Sort.IsEnabled = false; // 이미 정렬 완료되었으므로 비활성화
                 Button_FolderOpen.IsEnabled = true;
 
                 // 정렬 완료 후 폴더 트리로 전환
@@ -391,32 +397,57 @@ namespace iPhone_Photo_Sort
                             info.DateTaken = tagValue.Trim();
                         }
 
-                        // Resolution (Image Width x Height)
-                        if (tagName.Equals("Image Width", StringComparison.OrdinalIgnoreCase) ||
-                            tagName.Equals("Exif Image Width", StringComparison.OrdinalIgnoreCase))
+                        // Lens Model
+                        if (string.IsNullOrEmpty(info.LensModel) &&
+                            tagName.IndexOf("Lens Model", StringComparison.OrdinalIgnoreCase) >= 0)
                         {
-                            string width = tagValue.Trim().Replace(" pixels", "");
-                            if (!string.IsNullOrEmpty(info.Resolution) && info.Resolution.Contains("x"))
-                            {
-                                // Height가 이미 저장된 경우
-                            }
-                            else
-                            {
-                                info.Resolution = width + " x ";
-                            }
+                            info.LensModel = tagValue.Trim();
                         }
-                        if (tagName.Equals("Image Height", StringComparison.OrdinalIgnoreCase) ||
-                            tagName.Equals("Exif Image Height", StringComparison.OrdinalIgnoreCase))
+
+                        // Video Duration
+                        if (string.IsNullOrEmpty(info.Duration) &&
+                            tagName.Equals("Duration", StringComparison.OrdinalIgnoreCase))
                         {
-                            string height = tagValue.Trim().Replace(" pixels", "");
-                            if (!string.IsNullOrEmpty(info.Resolution) && info.Resolution.EndsWith(" x "))
-                            {
-                                info.Resolution += height;
-                            }
-                            else
-                            {
-                                info.Resolution = "? x " + height;
-                            }
+                            info.Duration = tagValue.Trim();
+                        }
+
+                        // Video Frame Rate
+                        if (string.IsNullOrEmpty(info.FrameRate) &&
+                            tagName.Equals("Frame Rate", StringComparison.OrdinalIgnoreCase))
+                        {
+                            info.FrameRate = tagValue.Trim();
+                        }
+
+                        // GPS Location (간략화된 형식으로 추출)
+                        if (string.IsNullOrEmpty(info.Location) &&
+                            tagName.StartsWith("GPS Latitude", StringComparison.OrdinalIgnoreCase))
+                        {
+                            // 위도가 감지되면 위치 정보가 있는 것으로 간주
+                            // 실제로는 Latitude/Longitude를 조합해야 하지만 여기서는 존재 여부와 간단한 값 위주로 표시
+                            info.Location = "Available";
+                        }
+
+                        // Resolution (Image Width x Height)
+                        bool isWidth = tagName.Equals("Image Width", StringComparison.OrdinalIgnoreCase) ||
+                                       tagName.Equals("Exif Image Width", StringComparison.OrdinalIgnoreCase);
+                        bool isHeight = tagName.Equals("Image Height", StringComparison.OrdinalIgnoreCase) ||
+                                        tagName.Equals("Exif Image Height", StringComparison.OrdinalIgnoreCase);
+
+                        if (isWidth || isHeight)
+                        {
+                            string val = tagValue.Trim().Replace(" pixels", "");
+                            string currentRes = info.Resolution ?? "";
+                            string[] parts = currentRes.Split(new[] { " x " }, StringSplitOptions.None);
+                            string w = parts.Length > 0 ? parts[0] : "";
+                            string h = parts.Length > 1 ? parts[1] : "";
+
+                            if (isWidth) w = val;
+                            if (isHeight) h = val;
+
+                            if (string.IsNullOrEmpty(w)) w = "?";
+                            if (string.IsNullOrEmpty(h)) h = "?";
+
+                            info.Resolution = $"{w} x {h}";
                         }
                     }
                 }
@@ -608,52 +639,156 @@ namespace iPhone_Photo_Sort
 
                 try
                 {
-                    // 비동기적으로 파일 목록 로드
-                    _fileNames = await Task.Run(() => 
-                        System.IO.Directory.EnumerateFiles(_directory)
-                        .Where(f => !System.IO.Path.GetFileName(f).StartsWith("."))
-                        .Select(f => System.IO.Path.GetFileName(f))
-                        .ToList()
-                    );
+                    // 기존 정렬 이력 확인
+                    string historyPath = System.IO.Path.Combine(_directory, SortHistory.FileName);
+                    bool historyLoaded = false;
 
-                    // FileSortInfo 리스트 생성 및 ListView에 바인딩
-                    foreach (var fileName in _fileNames)
+                    if (System.IO.File.Exists(historyPath))
                     {
-                        string fullPath = System.IO.Path.Combine(_directory, fileName);
-                        long fileBytes = 0;
-                        try { fileBytes = new FileInfo(fullPath).Length; } catch { }
-
-                        string fileSizeStr;
-                        if (fileBytes >= 1024 * 1024)
-                            fileSizeStr = $"{fileBytes / (1024.0 * 1024.0):F1} MB";
-                        else if (fileBytes >= 1024)
-                            fileSizeStr = $"{fileBytes / 1024.0:F1} KB";
-                        else
-                            fileSizeStr = $"{fileBytes} B";
-
-                        _fileSortInfos.Add(new FileSortInfo
-                        {
-                            FileName = fileName,
-                            OriginalPath = fullPath,
-                            FileSize = fileSizeStr,
-                            IsSorted = false
-                        });
+                        AddLine("기존 정렬 이력을 발견했습니다. 불러오는 중...");
+                        historyLoaded = await Task.Run(() => LoadSortHistory(historyPath));
                     }
 
-                    AddLine($"{_fileNames.Count}개의 파일을 찾았습니다.");
-                    TextBlock_FileCount.Text = $"{_fileNames.Count} files";
+                    if (historyLoaded)
+                    {
+                        // 이력 로드 성공: 트리뷰로 표시, SORT 비활성화
+                        AddLine($"정렬 이력을 불러왔습니다. ({_fileSortInfos.Count}개 파일)");
+                        TextBlock_FileCount.Text = $"{_fileSortInfos.Count} files (from history)";
+                        BuildFolderTree();
+
+                        ProgressBar_Status.IsIndeterminate = false;
+                        ProgressBar_Status.Visibility = Visibility.Hidden;
+                        Button_FolderOpen.IsEnabled = true;
+                        Button_Sort.IsEnabled = false; // 이미 정렬됨
+                    }
+                    else
+                    {
+                        // 이력 없음: 기존 로직 - 파일 목록 로드
+                        _fileNames = await Task.Run(() => 
+                            System.IO.Directory.EnumerateFiles(_directory)
+                            .Where(f => !System.IO.Path.GetFileName(f).StartsWith("."))
+                            .Select(f => System.IO.Path.GetFileName(f))
+                            .ToList()
+                        );
+
+                        foreach (var fileName in _fileNames)
+                        {
+                            string fullPath = System.IO.Path.Combine(_directory, fileName);
+                            long fileBytes = 0;
+                            try { fileBytes = new FileInfo(fullPath).Length; } catch { }
+
+                            string fileSizeStr;
+                            if (fileBytes >= 1024 * 1024)
+                                fileSizeStr = $"{fileBytes / (1024.0 * 1024.0):F1} MB";
+                            else if (fileBytes >= 1024)
+                                fileSizeStr = $"{fileBytes / 1024.0:F1} KB";
+                            else
+                                fileSizeStr = $"{fileBytes} B";
+
+                            _fileSortInfos.Add(new FileSortInfo
+                            {
+                                FileName = fileName,
+                                OriginalPath = fullPath,
+                                FileSize = fileSizeStr,
+                                IsSorted = false
+                            });
+                        }
+
+                        AddLine($"{_fileNames.Count}개의 파일을 찾았습니다.");
+                        TextBlock_FileCount.Text = $"{_fileNames.Count} files";
+
+                        ProgressBar_Status.IsIndeterminate = false;
+                        ProgressBar_Status.Visibility = Visibility.Hidden;
+                        Button_FolderOpen.IsEnabled = true;
+                        Button_Sort.IsEnabled = true;
+                    }
                 }
                 catch (Exception ex)
                 {
                     AddLine($"파일 로드 중 오류 발생: {ex.Message}");
-                }
-                finally
-                {
                     ProgressBar_Status.IsIndeterminate = false;
                     ProgressBar_Status.Visibility = Visibility.Hidden;
                     Button_FolderOpen.IsEnabled = true;
                     Button_Sort.IsEnabled = true;
                 }
+            }
+        }
+
+        /// <summary>
+        /// 정렬 결과를 JSON 파일로 저장합니다.
+        /// </summary>
+        private void SaveSortHistory()
+        {
+            try
+            {
+                var history = new SortHistory
+                {
+                    SourceDirectory = _directory,
+                    SortedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    AppVersion = TextBlock_BuildTime.Dispatcher.Invoke(() => TextBlock_BuildTime.Text)
+                };
+
+                Dispatcher.Invoke(() =>
+                {
+                    foreach (var info in _fileSortInfos)
+                    {
+                        history.Entries.Add(SortHistoryEntry.FromFileSortInfo(info));
+                    }
+                });
+
+                string historyPath = System.IO.Path.Combine(_directory, SortHistory.FileName);
+                var serializer = new DataContractJsonSerializer(typeof(SortHistory),
+                    new DataContractJsonSerializerSettings
+                    {
+                        UseSimpleDictionaryFormat = true
+                    });
+
+                using (var stream = System.IO.File.Create(historyPath))
+                {
+                    serializer.WriteObject(stream, history);
+                }
+            }
+            catch (Exception ex)
+            {
+                AddLine($"정렬 이력 저장 실패: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// JSON 파일에서 정렬 이력을 로드합니다.
+        /// </summary>
+        private bool LoadSortHistory(string historyPath)
+        {
+            try
+            {
+                SortHistory history;
+                var serializer = new DataContractJsonSerializer(typeof(SortHistory));
+
+                using (var stream = System.IO.File.OpenRead(historyPath))
+                {
+                    history = (SortHistory)serializer.ReadObject(stream);
+                }
+
+                if (history == null || history.Entries == null || history.Entries.Count == 0)
+                    return false;
+
+                Dispatcher.Invoke(() =>
+                {
+                    _fileSortInfos.Clear();
+                    foreach (var entry in history.Entries)
+                    {
+                        _fileSortInfos.Add(entry.ToFileSortInfo());
+                    }
+                });
+
+                AddLine($"정렬 일시: {history.SortedAt}");
+                AddLine($"앱 버전: {history.AppVersion}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                AddLine($"정렬 이력 로드 실패: {ex.Message}");
+                return false;
             }
         }
     }

@@ -63,6 +63,7 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -91,6 +92,7 @@
     </Compile>
     <Compile Include="FileSortInfo.cs" />
     <Compile Include="FolderTreeNode.cs" />
+    <Compile Include="SortHistory.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

@@ -25,6 +25,10 @@ namespace iPhone_Photo_Sort
         public string FocalLength { get; set; }
         public string DateTaken { get; set; }
         public string Resolution { get; set; }
+        public string LensModel { get; set; }
+        public string Location { get; set; }
+        public string Duration { get; set; }
+        public string FrameRate { get; set; }
 
         // 분류 결과 (정렬 후 채워짐)
         private string _destinationFolder;
@@ -83,18 +87,36 @@ namespace iPhone_Photo_Sort
                 if (!IsSorted)
                     return "ℹ️ SORT를 실행하면 상세 메타데이터를 확인할 수 있습니다.";
 
-                return
-                    $"📷 Camera: {CameraModel ?? "Unknown"}\n" +
-                    $"📐 Resolution: {Resolution ?? "N/A"}\n" +
+                string tooltip = 
+                    $"📷 Camera: {CameraModel ?? "Unknown"}\n";
+
+                if (!string.IsNullOrEmpty(LensModel))
+                    tooltip += $"🔍 Lens: {LensModel}\n";
+
+                tooltip += $"📐 Resolution: {Resolution ?? "N/A"}\n";
+
+                if (!string.IsNullOrEmpty(Duration))
+                    tooltip += $"⏱️ Duration: {Duration}\n";
+                if (!string.IsNullOrEmpty(FrameRate))
+                    tooltip += $"🎞️ Frame Rate: {FrameRate}\n";
+
+                tooltip += 
                     $"⚡ Exposure: {Exposure ?? "N/A"}\n" +
                     $"🔆 F-Number: {FNumber ?? "N/A"}\n" +
                     $"🎞️ ISO: {ISO ?? "N/A"}\n" +
                     $"🔭 Focal Length: {FocalLength ?? "N/A"}\n" +
-                    $"📅 Date Taken: {DateTaken ?? "N/A"}\n" +
+                    $"📅 Date Taken: {DateTaken ?? "N/A"}\n";
+
+                if (!string.IsNullOrEmpty(Location))
+                    tooltip += $"📍 Location: {Location}\n";
+
+                tooltip += 
                     $"💾 File Size: {FileSize ?? "N/A"}\n" +
                     $"──────────────────\n" +
                     $"📂 Destination: {DestinationFolder}\n" +
                     $"📋 Reason: {SortingReason}";
+
+                return tooltip;
             }
         }
     }
