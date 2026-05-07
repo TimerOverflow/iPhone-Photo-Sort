@@ -5,7 +5,7 @@
 
 **iPhone Photo Sort** is an intelligent media organizer specifically designed for iPhone users. It automatically categorizes thousands of photos and videos by camera model and smartly matches iPhone-specific edited versions (Filtered) with their originals (Org).
 
-![Hero Image](readme_hero.png)
+<img width="826" height="832" alt="image" src="https://github.com/user-attachments/assets/5e732162-e098-44f7-84a8-9acf895cdb2a" />
 
 ---
 
